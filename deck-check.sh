@@ -36,8 +36,8 @@ while getopts r:m:t:u: name; do
 		u)	gmd=$(echo "$OPTARG" | sed -E 's/.*s\///')
 		 ;;
 		?)	printf "Usage:\n"
-			printf "\t%s -u<getmydeck URL>\n" $(basename "$0")
-			printf "\t%s -r{US|UK|EU} -m{64|256|512} -t<rtReserveTime>\n" $(basename "$0")
+			printf "\t%s -u<getmydeck URL>\n" "$(basename "$0")"
+			printf "\t%s -r{US|UK|EU} -m{64|256|512} -t<rtReserveTime>\n" "$(basename "$0")"
 			printf "\nRequirements: jq curl bc\n"
 			exit 2
 		 ;;
@@ -62,7 +62,7 @@ if [ -z "$gmd" ]; then
 		printf "You must specify your reservation time with -t.\n"
 		badArgs=1
 	fi
-elif echo -n "$gmd" | grep -q -E "^(US|UK|EU)/(64|256|512)/[0-9]{10}"; then
+elif echo "$gmd" | grep -q -E "^(US|UK|EU)/(64|256|512)/[0-9]{10}"; then
 	region=$(echo "$gmd" | cut -d '/' -f 1)
 	model=$(echo "$gmd" | cut -d '/' -f 2)
 	rtResTime=$(echo "$gmd" | cut -d '/' -f 3)
@@ -72,17 +72,17 @@ else
 fi
 
 
-if ! echo -n "$region" | grep -q -E "^US\$|^us\$|^UK\$|^uk\$|^EU\$|^eu\$"; then
+if ! echo "$region" | grep -q -E "^US\$|^us\$|^UK\$|^uk\$|^EU\$|^eu\$"; then
 	printf 'Invalid region "%s", valid regions are US, UK, EU\n' "$region"
 	badArgs=1
 fi
 
-if ! echo -n "$model" | grep -q -E "^64\$|^256\$|^512\$"; then
+if ! echo "$model" | grep -q -E "^64\$|^256\$|^512\$"; then
 	printf 'Invalid model "%s", valid models are 64, 256, 512\n' "$model"
 	badArgs=1
 fi
 
-if ! echo -n "$rtResTime" | grep -q -E "^[0-9]{10}\$"; then
+if ! echo "$rtResTime" | grep -q -E "^[0-9]{10}\$"; then
 	printf 'Invalid reservation time "%s", it should be 10 digits (seconds since the epoch)\n' "$rtResTime"
 	badArgs=1
 fi
@@ -92,7 +92,7 @@ if [ $badArgs -ne 0 ]; then
 fi
 
 
-printf '%s %sGB reserved at %s (%s)\n' "$region" "$model" "$rtResTime" "$(date -d @$rtResTime)"
+printf '%s %sGB reserved at %s (%s)\n' "$region" "$model" "$rtResTime" "$(date -d @"$rtResTime")"
 
 ### Talk to getmydeck
 res=$(curl -s "https://getmydeck.ingenhaag.dev/api/v2/regions/$region/versions/$model/infos/$rtResTime")
@@ -128,7 +128,7 @@ estimatedConfirmTime=$( \
 
 estimatedConfirmTimeHuman=$(date -d "@$estimatedConfirmTime")
 
-echo -e "time frame\t\t: $(($timeDelta / 3600)) hours"
-echo -e "current percentage\t: $currentPercentage%"
-echo -e "increase\t\t: $increasedPercentage%"
-echo -e "estimated confirm time\t: $estimatedConfirmTime ($estimatedConfirmTimeHuman)"
+printf "time frame\t\t: %s hours\n" "$((timeDelta / 3600))"
+printf "current percentage\t: %s%%\n" "$currentPercentage"
+printf "increase\t\t: %s%%\n" "$increasedPercentage"
+printf "estimated confirm time\t: %s (%s)\n" "$estimatedConfirmTime" "$estimatedConfirmTimeHuman"
