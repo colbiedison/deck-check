@@ -20,6 +20,9 @@ cat <<LICENSE > /dev/null
 
 LICENSE
 
+
+DC_VERSION="1.0"
+
 region=
 model=
 rtResTime=
@@ -95,7 +98,9 @@ fi
 printf '%s %sGB reserved at %s (%s)\n' "$region" "$model" "$rtResTime" "$(date -d @"$rtResTime")"
 
 ### Talk to getmydeck
-res=$(curl -s "https://getmydeck.ingenhaag.dev/api/v2/regions/$region/versions/$model/infos/$rtResTime")
+curlAgent="$(curl --version | grep -E '^curl ' | sed -E 's/ \(.*//;s/ /\//')"
+userAgent="deck-check/$DC_VERSION $curlAgent"
+res=$(curl -sA "$userAgent" "https://getmydeck.ingenhaag.dev/api/v2/regions/$region/versions/$model/infos/$rtResTime")
 
 ### Cache response (for develpment purposes)
 #res=$(cat res.json)
